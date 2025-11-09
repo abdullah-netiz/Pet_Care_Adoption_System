@@ -16,19 +16,26 @@ const Badge = ({ type }) => {
 };
 
 const PetCard = ({ pet, cta, onCta, variant }) => {
+  // Handle both old mock data format and new context format
+  const displayName = pet.name || pet.petName;
+  const displayType = pet.type || pet.petType;
+  const displayAge = pet.age;
+  const displayGender = pet.gender;
+  const displayDescription = pet.description;
+  
   return (
     <div className="pet-card">
       <div className="pet-image" aria-hidden>
         <span className="pet-emoji">{pet.emoji || '🐾'}</span>
       </div>
       <div className="pet-info">
-        <h4>{pet.name}</h4>
+        <h4>{displayName}</h4>
         <div className="pet-meta">
-          <span>Type: <strong>{pet.type}</strong></span>
-          <span>Age: <strong>{pet.age}</strong></span>
-          <span>Gender: <strong>{pet.gender}</strong></span>
+          <span>Type: <strong>{displayType}</strong></span>
+          <span>Age: <strong>{displayAge}</strong></span>
+          <span>Gender: <strong>{displayGender}</strong></span>
         </div>
-        {pet.description && <p className="pet-desc">{pet.description}</p>}
+        {displayDescription && <p className="pet-desc">{displayDescription}</p>}
         {cta && (
           <div className="card-actions">
             <button className={`${variant === 'danger' ? 'danger-btn' : 'primary-btn'} compact fullwidth`} onClick={() => onCta?.(pet)}>{cta}</button>
@@ -40,7 +47,7 @@ const PetCard = ({ pet, cta, onCta, variant }) => {
 };
 
 const Profile = () => {
-  const { user, updateProfile, updatePassword } = useAuth();
+  const { user, updateProfile, updatePassword, userPets, deletePet } = useAuth();
   const navigate = useNavigate();
 
   const [emailForm, setEmailForm] = useState({ email: user?.email || '', phone: user?.phone || '' });
@@ -69,7 +76,8 @@ const Profile = () => {
 
   const [savedPets, setSavedPets] = useState(initialSaved);
   const adoptedPets = initialAdopted;
-  const [myListings, setMyListings] = useState(initialListings);
+  // Use userPets from context for owner listings
+  const myListings = userPets.length > 0 ? userPets : initialListings;
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newPet, setNewPet] = useState({ name: '', type: 'Dog', age: '', gender: 'Male', description: '' });
@@ -123,9 +131,9 @@ const Profile = () => {
     setNewPet({ name: '', type: 'Dog', age: '', gender: 'Male', description: '' });
   };
 
-  const handleDeleteListing = (id) => {
+  const handleDeleteListing = (pet) => {
     if (confirm('Delete this pet listing?')) {
-      setMyListings(prev => prev.filter(p => p.id !== id));
+      deletePet(pet.id);
     }
   };
 
@@ -183,7 +191,7 @@ const Profile = () => {
           {isOwner ? (
             <div className="pet-grid large">
               {myListings.map(p => (
-                <PetCard pet={p} key={p.id} cta="Delete Pet" variant="danger" onCta={() => handleDeleteListing(p.id)} />
+                <PetCard pet={p} key={p.id} cta="Delete Pet" variant="danger" onCta={() => handleDeleteListing(p)} />
               ))}
             </div>
           ) : (

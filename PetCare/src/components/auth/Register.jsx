@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
 const Register = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -54,18 +55,7 @@ const Register = () => {
     setTimeout(() => {
       // Mock successful registration for frontend design purposes
       console.log('Mock registration successful');
-      setSuccess('Account created successfully! Logging you in...');
-      
-      // Mock user data from registration form
-      const mockUser = {
-        id: Date.now(), // Simple ID generation for mock
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        userType: formData.userType
-      };
-      const mockToken = 'mock-jwt-token-' + Date.now();
+      setSuccess('Account created successfully! Please sign in with your credentials.');
       
       // Clear form
       const clearedForm = {
@@ -81,10 +71,10 @@ const Register = () => {
       
       setIsLoading(false);
       
-      // Auto login after 1.5 seconds to show success message
+      // Redirect to login page after 2 seconds
       setTimeout(() => {
-        login(mockUser, mockToken);
-      }, 1500);
+        navigate('/login');
+      }, 2000);
     }, 1500); // 1.5 second delay to show loading state
 
     // TODO: Replace with actual API call when backend is ready

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import './AddPet.css';
 
 const AddPet = () => {
   const navigate = useNavigate();
+  const { addPet } = useAuth();
   
   const [formData, setFormData] = useState({
     petName: '',
@@ -53,11 +55,14 @@ const AddPet = () => {
       return;
     }
 
+    // Add pet to context
+    addPet(formData);
+    
     // Mock submission
     setSuccess('Pet added successfully! Redirecting...');
     setTimeout(() => {
       navigate('/profile');
-    }, 2000);
+    }, 1500);
   };
 
   const handleCancel = () => {
@@ -75,7 +80,7 @@ const AddPet = () => {
       </div>
 
       <div className="add-pet-container">
-    <div className="header-content">
+    <div className="header-content">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
           <h1>Add Pet 🐾</h1>
           <p>Help a Pet find their forever home</p>
         </div>
