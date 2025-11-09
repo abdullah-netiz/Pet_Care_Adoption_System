@@ -3,6 +3,10 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
+import Profile from './pages/Profile';
+import AddPet from './pages/AddPet';
+import BrowsePets from './pages/BrowsePets';
+import PetDetail from './pages/PetDetail';
 import './App.css';
 
 const AppRoutes = () => {
@@ -38,6 +42,30 @@ const AppRoutes = () => {
         element={
           isAuthenticated ? <Home /> : <Navigate to="/login" replace />
         } 
+      />
+      <Route
+        path="/profile"
+        element={
+          isAuthenticated ? <Profile /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/add-pet"
+        element={
+          isAuthenticated ? <AddPet /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/browse"
+        element={
+          isAuthenticated ? <BrowsePets /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
+        path="/pet/:id"
+        element={
+          isAuthenticated ? <PetDetail /> : <Navigate to="/login" replace />
+        }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

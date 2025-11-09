@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -26,6 +27,7 @@ export const AuthProvider = ({ children }) => {
         firstName: 'Pet', 
         lastName: 'Lover',
         email: 'pet.lover@example.com',
+        phone: '+1 (555) 123-4567',
         userType: 'adopter'
       });
     }
@@ -44,12 +46,32 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
+  // Frontend-only updates for profile details
+  const updateProfile = ({ email, phone, firstName, lastName }) => {
+    setUser(prev => ({
+      ...prev,
+      ...(email !== undefined ? { email } : {}),
+      ...(phone !== undefined ? { phone } : {}),
+      ...(firstName !== undefined ? { firstName } : {}),
+      ...(lastName !== undefined ? { lastName } : {}),
+    }));
+    return Promise.resolve({ success: true });
+  };
+
+  // Frontend-only password change (no persistence)
+  const updatePassword = async () => {
+    // In real app, call API; here we just resolve for UX flow
+    return Promise.resolve({ success: true });
+  };
+
   const value = {
     user,
     isAuthenticated,
     isLoading,
     login,
-    logout
+    logout,
+    updateProfile,
+    updatePassword
   };
 
   return (
