@@ -15,7 +15,6 @@ import './App.css';
 
 const AppRoutes = () => {
   const { isAuthenticated, isLoading } = useAuth();
-
   console.log('AppRoutes render - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
 
   if (isLoading) {
