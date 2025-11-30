@@ -1,133 +1,347 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getPet, createAdoptionRequest, updatePet, deletePet } from '../services/firebaseService';
 import Navbar from '../components/Navbar';
 import './PetDetail.css';
 
 const PetDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [pet, setPet] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [requestMessage, setRequestMessage] = useState('');
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
 
   useEffect(() => {
-    // Mock data - replace with API call later
-    const mockPets = [
-      {
-        id: 1,
-        name: 'Buddy',
-        type: 'Dog',
-        breed: 'Golden Retriever',
-        age: '2 Years',
-        gender: 'Male',
-        city: 'Karachi',
-        description: 'This is a very good dog, and is in brown and very faithful. If parrot does not obey you use a whip to make him listen.',
-        healthInfo: {
-          vaccinated: true,
-          dewormed: true,
-          spayedNeutered: true,
-          lastUpdate: 'March 2025'
-        },
-        owner: {
-          name: 'XYZ',
-          city: 'ABC',
-          email: 'abc@gmail.com',
-          phone: '03xx-xxxxxxx'
-        },
-        images: [
-          'https://via.placeholder.com/400x300/cccccc/666666?text=Pet+Image+1',
-          'https://via.placeholder.com/400x300/cccccc/666666?text=Pet+Image+2',
-          'https://via.placeholder.com/400x300/cccccc/666666?text=Pet+Image+3'
-        ]
-      },
-      // Add more mock pets as needed
-    ];
-
-    // Find pet by id or default to first pet
-    const foundPet = mockPets.find(p => p.id === parseInt(id)) || mockPets[0];
-    setPet(foundPet);
+    loadPet();
   }, [id]);
 
-  const handleAdopt = () => {
-    alert('Adoption request sent successfully!');
-    navigate('/browse');
+  const loadPet = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const petData = await getPet(id);
+      if (petData) {
+        setPet(petData);
+      } else {
+        setError('Pet not found');
+      }
+    } catch (err) {
+      console.error('Error loading pet:', err);
+      setError('Failed to load pet details');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleBack = () => {
-    navigate('/browse');
+  const handleRequestAdoption = async () => {
+    if (!requestMessage.trim()) {
+      alert('Please write a message about why you want to adopt this pet');
+      return;
+    }
+
+    setIsSubmittingRequest(true);
+    try {
+      await createAdoptionRequest({
+        petId: pet.id,
+        petName: pet.name,
+        petType: pet.type,
+        petImage: pet.imageUrl || '',
+        adopterId: user.id,
+        adopterName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.displayName || 'Anonymous',
+        adopterEmail: user.email,
+        adopterPhone: user.phone || '',
+        ownerId: pet.ownerId,
+        ownerName: pet.ownerName,
+        ownerEmail: pet.ownerEmail,
+        message: requestMessage
+      });
+
+      alert('Adoption request sent successfully! The pet owner will review your request.');
+      setShowRequestModal(false);
+      setRequestMessage('');
+    } catch (err) {
+      console.error('Error submitting request:', err);
+      alert('Failed to submit adoption request. Please try again.');
+    } finally {
+      setIsSubmittingRequest(false);
+    }
   };
 
-  if (!pet) {
-    return <div>Loading...</div>;
+  const handleEditPet = () => {
+    // Navigate to edit page (would need to create an edit page)
+    alert('Edit functionality - would navigate to edit page');
+  };
+
+  const handleDeletePet = async () => {
+    if (window.confirm('Are you sure you want to delete this pet listing?')) {
+      try {
+        await deletePet(pet.id);
+        alert('Pet listing deleted successfully');
+        navigate('/browse-pets');
+      } catch (err) {
+        console.error('Error deleting pet:', err);
+        alert('Failed to delete pet listing');
+      }
+    }
+  };
+
+  const getPetEmoji = (type) => {
+    const emojiMap = {
+      'Dog': '🐕',
+      'Cat': '🐱',
+      'Bird': '🦜',
+      'Rabbit': '🐰',
+      'Other': '🐾'
+    };
+    return emojiMap[type] || '🐾';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="pet-detail-page">
+        <Navbar />
+        <div className="loading-container">
+          <div className="loading-spinner-large"></div>
+          <p>Loading pet details...</p>
+        </div>
+      </div>
+    );
   }
+
+  if (error || !pet) {
+    return (
+      <div className="pet-detail-page">
+        <Navbar />
+        <div className="error-container">
+          <div className="error-icon">😿</div>
+          <h2>{error || 'Pet not found'}</h2>
+          <button onClick={() => navigate('/browse-pets')} className="back-btn">
+            Back to Browse
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isOwner = user?.id === pet.ownerId;
+  const isAdopter = user?.userType === 'adopter';
 
   return (
     <div className="pet-detail-page">
       <Navbar />
+      
       <div className="pet-detail-container">
-        <div className="pet-detail-card">
+        <button onClick={() => navigate('/browse-pets')} className="back-button">
+          ← Back to Browse
+        </button>
+
+        <div className="pet-detail-content">
           <div className="pet-detail-image-section">
-            <div className="pet-main-image">
-              <img src={pet.images[0]} alt={pet.name} />
+            {pet.imageUrl ? (
+              <img src={pet.imageUrl} alt={pet.name} className="pet-detail-image" />
+            ) : (
+              <div className="pet-detail-placeholder">
+                <span className="pet-placeholder-emoji-large">
+                  {getPetEmoji(pet.type)}
+                </span>
+              </div>
+            )}
+            
+            <div className="pet-status-badge">
+              {pet.status === 'available' ? '✓ Available' : '❌ Not Available'}
             </div>
           </div>
 
-          <div className="pet-detail-content">
+          <div className="pet-detail-info-section">
             <div className="pet-detail-header">
-              <h1 className="pet-name">{pet.name}</h1>
-              <p className="pet-breed">{pet.breed}</p>
-              <div className="pet-meta-info">
-                <span>Age: {pet.age}</span>
-                <span>Gender: {pet.gender}</span>
-                <span>City: {pet.city}</span>
+              <div>
+                <h1 className="pet-detail-name">{pet.name}</h1>
+                <div className="pet-detail-type-badge">{pet.type}</div>
               </div>
+              
+              {isOwner && (
+                <div className="owner-actions">
+                  <button onClick={handleEditPet} className="edit-btn" title="Edit">
+                    ✏️
+                  </button>
+                  <button onClick={handleDeletePet} className="delete-btn" title="Delete">
+                    🗑️
+                  </button>
+                </div>
+              )}
             </div>
 
-            <div className="pet-detail-sections">
-              <div className="pet-section">
-                <h3 className="section-title">About</h3>
-                <p className="section-text">{pet.description}</p>
+            <div className="pet-detail-quick-info">
+              <div className="quick-info-item">
+                <span className="info-icon">🎂</span>
+                <div>
+                  <span className="info-label">Age</span>
+                  <span className="info-value">{pet.age}</span>
+                </div>
               </div>
 
-              <div className="pet-info-grid">
-                <div className="info-card">
-                  <h3 className="section-title">Health & Vaccination</h3>
-                  <ul className="info-list">
-                    {pet.healthInfo.vaccinated && <li>Vaccinated</li>}
-                    {pet.healthInfo.dewormed && <li>De wormed</li>}
-                    {pet.healthInfo.spayedNeutered && <li>Sprayed/Neutered</li>}
-                    <li>Pet Updated: {pet.healthInfo.lastUpdate}</li>
-                  </ul>
+              <div className="quick-info-item">
+                <span className="info-icon">
+                  {pet.gender === 'Male' ? '♂️' : '♀️'}
+                </span>
+                <div>
+                  <span className="info-label">Gender</span>
+                  <span className="info-value">{pet.gender}</span>
                 </div>
+              </div>
 
-                <div className="info-card">
-                  <h3 className="section-title">Owner Details</h3>
-                  <ul className="info-list">
-                    <li>Name: {pet.owner.name}</li>
-                    <li>City: {pet.owner.city}</li>
-                    <li>Email: {pet.owner.email}</li>
-                    <li>Phone number: {pet.owner.phone}</li>
-                  </ul>
+              <div className="quick-info-item">
+                <span className="info-icon">📏</span>
+                <div>
+                  <span className="info-label">Size</span>
+                  <span className="info-value">{pet.size}</span>
                 </div>
+              </div>
 
-                <div className="info-card images-card">
-                  <h3 className="section-title">Images</h3>
-                  <div className="images-placeholder">
-                    <button className="see-more-btn">+ see more →</button>
+              {pet.breed && (
+                <div className="quick-info-item">
+                  <span className="info-icon">🐾</span>
+                  <div>
+                    <span className="info-label">Breed</span>
+                    <span className="info-value">{pet.breed}</span>
                   </div>
                 </div>
+              )}
+            </div>
+
+            {pet.city && (
+              <div className="pet-location-section">
+                <span className="location-icon">📍</span>
+                <span className="location-text">{pet.city}</span>
+              </div>
+            )}
+
+            <div className="pet-detail-section">
+              <h2>About {pet.name}</h2>
+              <p className="pet-description-full">{pet.description}</p>
+            </div>
+
+            {pet.medicalHistory && (
+              <div className="pet-detail-section">
+                <h2>Medical History</h2>
+                <p className="pet-medical-info">{pet.medicalHistory}</p>
+              </div>
+            )}
+
+            <div className="pet-detail-section">
+              <h2>Health Status</h2>
+              <div className="health-badges">
+                {pet.vaccinated && (
+                  <div className="health-badge positive">
+                    <span className="badge-icon">✓</span>
+                    Vaccinated
+                  </div>
+                )}
+                {pet.spayedNeutered && (
+                  <div className="health-badge positive">
+                    <span className="badge-icon">✓</span>
+                    Spayed/Neutered
+                  </div>
+                )}
+                {!pet.vaccinated && !pet.spayedNeutered && (
+                  <p className="no-info">No health information provided</p>
+                )}
               </div>
             </div>
 
-            <div className="pet-detail-actions">
-              <button className="back-btn" onClick={handleBack}>
-                Back to browse
+            <div className="pet-detail-section">
+              <h2>Contact Information</h2>
+              <div className="contact-info">
+                <div className="contact-item">
+                  <span className="contact-icon">👤</span>
+                  <span className="contact-text">{pet.ownerName}</span>
+                </div>
+                <div className="contact-item">
+                  <span className="contact-icon">📧</span>
+                  <span className="contact-text">{pet.ownerEmail}</span>
+                </div>
+                {pet.ownerPhone && (
+                  <div className="contact-item">
+                    <span className="contact-icon">📱</span>
+                    <span className="contact-text">{pet.ownerPhone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {isAdopter && pet.status === 'available' && !isOwner && (
+              <div className="adoption-action-section">
+                <button 
+                  onClick={() => setShowRequestModal(true)}
+                  className="request-adoption-btn"
+                >
+                  <span className="btn-icon">💝</span>
+                  Request to Adopt {pet.name}
+                </button>
+              </div>
+            )}
+
+            {!isAdopter && !isOwner && (
+              <div className="info-message">
+                <p>ℹ️ Only adopters can request adoptions. Switch to an adopter account to adopt this pet.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Adoption Request Modal */}
+      {showRequestModal && (
+        <div className="modal-overlay" onClick={() => setShowRequestModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Request to Adopt {pet.name}</h2>
+              <button 
+                onClick={() => setShowRequestModal(false)}
+                className="modal-close"
+              >
+                ×
               </button>
-              <button className="adopt-btn" onClick={handleAdopt}>
-                Adopt me
+            </div>
+
+            <div className="modal-body">
+              <p className="modal-description">
+                Tell the owner why you'd like to adopt {pet.name} and how you'll provide a loving home.
+              </p>
+              
+              <textarea
+                value={requestMessage}
+                onChange={(e) => setRequestMessage(e.target.value)}
+                placeholder="Write your message here..."
+                rows="6"
+                className="request-message-input"
+              />
+            </div>
+
+            <div className="modal-footer">
+              <button 
+                onClick={() => setShowRequestModal(false)}
+                className="modal-cancel-btn"
+                disabled={isSubmittingRequest}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleRequestAdoption}
+                className="modal-submit-btn"
+                disabled={isSubmittingRequest || !requestMessage.trim()}
+              >
+                {isSubmittingRequest ? 'Sending...' : 'Send Request'}
               </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

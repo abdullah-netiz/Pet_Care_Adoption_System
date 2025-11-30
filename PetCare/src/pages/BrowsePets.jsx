@@ -1,44 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getAllPets } from '../services/firebaseService';
 import Navbar from '../components/Navbar';
 import './BrowsePets.css';
 
 const BrowsePets = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [filters, setFilters] = useState({
     petType: '',
     city: '',
   });
+  const [pets, setPets] = useState([]);
+  const [filteredPets, setFilteredPets] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Mock data - many pets for a fuller display
-  const allPets = [
-    { id: 1, name: 'Golden Retriever', type: 'Dog', age: '2 years', size: 'Large', description: 'This is a very good dog, and is in black color and very faithful. If dog does not obey you use a whip to make him listen.', image: null },
-    { id: 2, name: 'Siamese Cat', type: 'Cat', age: '3- years', size: 'Large', description: 'This is a very good cat, and is in white color and very faithful. If cat does not obey you use a whip to make him listen.', image: null },
-    { id: 3, name: 'Green Parrot', type: 'Bird', age: '1- years', size: 'Large', description: 'This is a very good parrot, and is in green color and very faithful. If parrot does not obey you use a whip to make him listen.', image: null },
-    { id: 4, name: 'Labrador', type: 'Dog', age: '1 year', size: 'Medium', description: 'Friendly and energetic Labrador puppy looking for a loving home. Great with kids!', image: null },
-    { id: 5, name: 'Persian Cat', type: 'Cat', age: '4 years', size: 'Medium', description: 'Beautiful Persian cat with long fur. Very calm and loves to cuddle.', image: null },
-    { id: 6, name: 'German Shepherd', type: 'Dog', age: '3 years', size: 'Large', description: 'Well-trained German Shepherd, excellent guard dog and family companion.', image: null },
-    { id: 7, name: 'Bengal Cat', type: 'Cat', age: '2 years', size: 'Medium', description: 'Active and playful Bengal cat with beautiful spotted coat pattern.', image: null },
-    { id: 8, name: 'Cockatiel', type: 'Bird', age: '6 months', size: 'Small', description: 'Sweet and friendly cockatiel that loves to whistle and play.', image: null },
-    { id: 9, name: 'Beagle', type: 'Dog', age: '2 years', size: 'Medium', description: 'Adorable Beagle with great temperament, loves walks and treats.', image: null },
-    { id: 10, name: 'Maine Coon', type: 'Cat', age: '5 years', size: 'Large', description: 'Gentle giant Maine Coon, very affectionate and great with children.', image: null },
-    { id: 11, name: 'Budgie', type: 'Bird', age: '1 year', size: 'Small', description: 'Colorful budgie that loves to chirp and socialize.', image: null },
-    { id: 12, name: 'Poodle', type: 'Dog', age: '4 years', size: 'Medium', description: 'Elegant toy poodle, hypoallergenic and very intelligent.', image: null },
-    { id: 13, name: 'British Shorthair', type: 'Cat', age: '3 years', size: 'Medium', description: 'Calm and dignified British Shorthair with plush grey coat.', image: null },
-    { id: 14, name: 'Husky', type: 'Dog', age: '2 years', size: 'Large', description: 'Beautiful Siberian Husky with striking blue eyes and friendly nature.', image: null },
-    { id: 15, name: 'Ragdoll Cat', type: 'Cat', age: '1 year', size: 'Large', description: 'Docile Ragdoll cat that goes limp when picked up, very gentle.', image: null },
-    { id: 16, name: 'Lovebird', type: 'Bird', age: '8 months', size: 'Small', description: 'Pair of lovebirds, very social and affectionate with each other.', image: null },
-    { id: 17, name: 'Bulldog', type: 'Dog', age: '3 years', size: 'Medium', description: 'Friendly English Bulldog, great for apartments and families.', image: null },
-    { id: 18, name: 'Sphynx Cat', type: 'Cat', age: '2 years', size: 'Medium', description: 'Unique hairless Sphynx cat, warm to touch and very loving.', image: null },
-    { id: 19, name: 'Macaw', type: 'Bird', age: '5 years', size: 'Large', description: 'Stunning blue and gold macaw, can learn to talk and very intelligent.', image: null },
-    { id: 20, name: 'Pug', type: 'Dog', age: '1 year', size: 'Small', description: 'Charming pug puppy with wrinkly face and playful personality.', image: null },
-    { id: 21, name: 'Abyssinian Cat', type: 'Cat', age: '2 years', size: 'Medium', description: 'Active Abyssinian with reddish coat, very curious and playful.', image: null },
-    { id: 22, name: 'Boxer', type: 'Dog', age: '4 years', size: 'Large', description: 'Energetic Boxer dog, great with kids and loves to play.', image: null },
-    { id: 23, name: 'Scottish Fold', type: 'Cat', age: '3 years', size: 'Medium', description: 'Sweet Scottish Fold with unique folded ears and calm demeanor.', image: null },
-    { id: 24, name: 'Conure', type: 'Bird', age: '1 year', size: 'Small', description: 'Vibrant sun conure with yellow and orange plumage, very social.', image: null },
-  ];
+  useEffect(() => {
+    loadPets();
+  }, []);
 
-  const [pets] = useState(allPets);
+  useEffect(() => {
+    applyFilters();
+  }, [filters, pets]);
+
+  const loadPets = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const allPets = await getAllPets({ status: 'available' });
+      setPets(allPets);
+      setFilteredPets(allPets);
+    } catch (err) {
+      console.error('Error loading pets:', err);
+      setError('Failed to load pets. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const applyFilters = () => {
+    let result = [...pets];
+
+    if (filters.petType) {
+      result = result.filter(pet => pet.type === filters.petType);
+    }
+
+    if (filters.city) {
+      result = result.filter(pet => 
+        pet.city?.toLowerCase().includes(filters.city.toLowerCase())
+      );
+    }
+
+    setFilteredPets(result);
+  };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -46,14 +62,23 @@ const BrowsePets = () => {
   };
 
   const handleSearch = () => {
-    // In real app, this would filter the pets
-    console.log('Searching with filters:', filters);
+    applyFilters();
   };
 
-  const filteredPets = pets.filter(pet => {
-    if (filters.petType && pet.type !== filters.petType) return false;
-    return true;
-  });
+  const handlePetClick = (petId) => {
+    navigate(`/pet/${petId}`);
+  };
+
+  const getPetEmoji = (type) => {
+    const emojiMap = {
+      'Dog': '🐕',
+      'Cat': '🐱',
+      'Bird': '🦜',
+      'Rabbit': '🐰',
+      'Other': '🐾'
+    };
+    return emojiMap[type] || '🐾';
+  };
 
   return (
     <div className="browse-pets-page">
@@ -70,29 +95,22 @@ const BrowsePets = () => {
               onChange={handleFilterChange}
               className="filter-select"
             >
-              <option value="">Pet Type</option>
-              <option value="Dog">Dog</option>
-              <option value="Cat">Cat</option>
-              <option value="Bird">Bird</option>
-              <option value="Rabbit">Rabbit</option>
-              <option value="Other">Other</option>
+              <option value="">All Pet Types</option>
+              <option value="Dog">🐕 Dogs</option>
+              <option value="Cat">🐱 Cats</option>
+              <option value="Bird">🦜 Birds</option>
+              <option value="Rabbit">🐰 Rabbits</option>
+              <option value="Other">🐾 Other</option>
             </select>
 
-            <select
+            <input
+              type="text"
               name="city"
               value={filters.city}
               onChange={handleFilterChange}
+              placeholder="Enter city..."
               className="filter-select"
-            >
-              <option value="">All Cities</option>
-              <option value="New York">New York</option>
-              <option value="Los Angeles">Los Angeles</option>
-              <option value="Chicago">Chicago</option>
-              <option value="Houston">Houston</option>
-              <option value="Phoenix">Phoenix</option>
-              <option value="Philadelphia">Philadelphia</option>
-              <option value="San Antonio">San Antonio</option>
-            </select>
+            />
 
             <button className="search-btn" onClick={handleSearch}>
               Search
@@ -100,36 +118,116 @@ const BrowsePets = () => {
           </div>
         </div>
 
-        <div className="pets-grid">
-          {filteredPets.map(pet => (
-            <div key={pet.id} className="pet-browse-card">
-              <div className="pet-browse-image">
-                {/* Placeholder for image */}
-              </div>
-              <div className="pet-browse-info">
-                <h3 className="pet-browse-name">{pet.name}</h3>
-                <div className="pet-browse-meta">
-                  <span className="meta-item">
-                    <strong>Pet-Type</strong> {pet.type}
-                  </span>
-                  <span className="meta-item">
-                    <span className="icon">🎂</span> <strong>{pet.age}</strong>
-                  </span>
-                  <span className="meta-item">
-                    <strong>{pet.size}</strong>
-                  </span>
-                </div>
-                <p className="pet-browse-description">{pet.description}</p>
+        {isLoading ? (
+          <div className="loading-container">
+            <div className="loading-spinner-large"></div>
+            <p>Loading pets...</p>
+          </div>
+        ) : error ? (
+          <div className="error-container">
+            <p className="error-text">{error}</p>
+            <button onClick={loadPets} className="retry-btn">Retry</button>
+          </div>
+        ) : (
+          <>
+            <div className="results-summary">
+              <h2>{filteredPets.length} Pets Available for Adoption</h2>
+              {user?.userType === 'shelter' && (
                 <button 
-                  className="view-detail-btn"
-                  onClick={() => navigate(`/pet/${pet.id}`)}
+                  onClick={() => navigate('/add-pet')}
+                  className="add-pet-btn"
                 >
-                  View Detail
+                  + List New Pet
                 </button>
-              </div>
+              )}
             </div>
-          ))}
-        </div>
+
+            {filteredPets.length === 0 ? (
+              <div className="no-results">
+                <div className="no-results-icon">🐾</div>
+                <h3>No pets found</h3>
+                <p>Try adjusting your filters or check back later</p>
+                {user?.userType === 'shelter' && (
+                  <button 
+                    onClick={() => navigate('/add-pet')}
+                    className="add-first-pet-btn"
+                  >
+                    List Your First Pet
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="pets-grid">
+                {filteredPets.map((pet) => (
+                  <div 
+                    key={pet.id} 
+                    className="pet-card"
+                    onClick={() => handlePetClick(pet.id)}
+                  >
+                    <div className="pet-card-image">
+                      {pet.imageUrl ? (
+                        <img src={pet.imageUrl} alt={pet.name} />
+                      ) : (
+                        <div className="pet-card-placeholder">
+                          <span className="pet-placeholder-emoji">
+                            {getPetEmoji(pet.type)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="pet-card-badge">{pet.type}</div>
+                    </div>
+
+                    <div className="pet-card-content">
+                      <h3 className="pet-card-name">{pet.name}</h3>
+                      
+                      <div className="pet-card-details">
+                        <div className="pet-detail-item">
+                          <span className="detail-icon">🎂</span>
+                          <span className="detail-text">{pet.age}</span>
+                        </div>
+                        <div className="pet-detail-item">
+                          <span className="detail-icon">
+                            {pet.gender === 'Male' ? '♂️' : '♀️'}
+                          </span>
+                          <span className="detail-text">{pet.gender}</span>
+                        </div>
+                        <div className="pet-detail-item">
+                          <span className="detail-icon">📏</span>
+                          <span className="detail-text">{pet.size}</span>
+                        </div>
+                      </div>
+
+                      {pet.city && (
+                        <div className="pet-location">
+                          <span className="location-icon">📍</span>
+                          <span className="location-text">{pet.city}</span>
+                        </div>
+                      )}
+
+                      <p className="pet-description">
+                        {pet.description?.substring(0, 100)}
+                        {pet.description?.length > 100 ? '...' : ''}
+                      </p>
+
+                      <div className="pet-tags">
+                        {pet.vaccinated && (
+                          <span className="pet-tag">✓ Vaccinated</span>
+                        )}
+                        {pet.spayedNeutered && (
+                          <span className="pet-tag">✓ Spayed/Neutered</span>
+                        )}
+                      </div>
+
+                      <button className="view-details-btn">
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ const Home = () => {
                 </div>
               )}
               <div className="hero-cta">
-                <button className="cta-primary" onClick={() => navigate('/browse')}>
+                <button className="cta-primary" onClick={() => navigate('/browse-pets')}>
                   Browse Pets
                 </button>
                 <button className="cta-secondary" onClick={() => navigate('/add-pet')}>
@@ -183,7 +183,7 @@ const Home = () => {
           <div className="cta-content">
             <h2>Ready to Make a Difference? 🎉</h2>
             <p>Start your adoption journey today and bring home unconditional love</p>
-            <button className="cta-large" onClick={() => navigate('/browse')}>
+            <button className="cta-large" onClick={() => navigate('/browse-pets')}>
               Find Your Pet Today
             </button>
           </div>

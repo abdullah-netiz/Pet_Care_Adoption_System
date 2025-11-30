@@ -1,0 +1,695 @@
+.shelters-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFF8F0 0%, #FFF0E0 100%);
+}
+
+.shelters-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Header Section */
+.shelters-header {
+  background: linear-gradient(135deg, #FD9A39 0%, #FF8C42 100%);
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: white;
+  box-shadow: 0 8px 30px rgba(253, 154, 57, 0.3);
+}
+
+.header-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.location-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.shelters-header h1 {
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shelters-header p {
+  font-size: 1.1rem;
+  margin: 0;
+  opacity: 0.95;
+}
+
+/* Search and Filter Controls */
+.shelters-controls {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.search-bar-shelters {
+  flex: 1;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.search-input-shelters {
+  flex: 1;
+  padding: 0.95rem 1.2rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.25s;
+}
+
+.search-input-shelters:focus {
+  outline: none;
+  border-color: #FD9A39;
+  box-shadow: 0 0 0 3px rgba(253, 154, 57, 0.1);
+}
+
+.search-btn-near-me {
+  padding: 0.95rem 1.75rem;
+  background: linear-gradient(135deg, #FD9A39 0%, #FF8C42 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.search-btn-near-me:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 154, 57, 0.4);
+}
+
+.distance-filter {
+  padding: 0.95rem 1.2rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  background: white;
+  min-width: 150px;
+  transition: all 0.25s;
+}
+
+.distance-filter:hover {
+  border-color: #cbd5e0;
+}
+
+.distance-filter:focus {
+  outline: none;
+  border-color: #FD9A39;
+}
+
+/* Main Content Layout */
+.shelters-main-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Map Section */
+.map-section {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.interactive-map {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  height: 600px;
+}
+
+.map-placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  color: #718096;
+}
+
+.map-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.map-placeholder p {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #2d3748;
+}
+
+.map-subtext {
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+/* Shelters List Section */
+.shelters-list-section {
+  overflow-y: auto;
+  max-height: 100vh;
+  padding-right: 0.5rem;
+}
+
+.results-count {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 1.5rem 0;
+}
+
+.shelters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Shelter Card */
+.shelter-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+  border: 2px solid transparent;
+}
+
+.shelter-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  border-color: #FD9A39;
+}
+
+.shelter-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.shelter-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 0.5rem 0;
+}
+
+.shelter-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.star {
+  font-size: 1.1rem;
+}
+
+.rating-value {
+  font-weight: 700;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.reviews-count {
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.distance-badge {
+  background: #FD9A39;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Shelter Details */
+.shelter-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: #4a5568;
+}
+
+.detail-icon {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+}
+
+.detail-text {
+  flex: 1;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.status-open {
+  background: #C6F6D5;
+  color: #22543D;
+}
+
+.status-closed {
+  background: #FED7D7;
+  color: #742A2A;
+}
+
+/* Available Pets */
+.available-pets {
+  background: #FFF8F0;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pets-label {
+  display: block;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.pets-count-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.pet-count-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  padding: 0.75rem;
+  border-radius: 10px;
+  justify-content: center;
+}
+
+.pet-icon {
+  font-size: 1.5rem;
+}
+
+.pet-number {
+  font-weight: 700;
+  color: #2d3748;
+  font-size: 1.1rem;
+}
+
+/* Action Buttons */
+.shelter-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.btn-view-pets,
+.btn-get-directions {
+  padding: 0.95rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+
+.btn-view-pets {
+  background: linear-gradient(135deg, #FD9A39 0%, #FF8C42 100%);
+  color: white;
+}
+
+.btn-view-pets:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 154, 57, 0.4);
+}
+
+.btn-get-directions {
+  background: white;
+  color: #FD9A39;
+  border: 2px solid #FD9A39;
+}
+
+.btn-get-directions:hover {
+  background: #FD9A39;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 154, 57, 0.3);
+}
+
+/* Help Section */
+.help-section {
+  background: linear-gradient(135deg, #FD9A39 0%, #FF8C42 100%);
+  border-radius: 24px;
+  padding: 3rem;
+  text-align: center;
+  color: white;
+  box-shadow: 0 8px 30px rgba(253, 154, 57, 0.3);
+}
+
+.help-content h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.75rem 0;
+}
+
+.help-content p {
+  font-size: 1.1rem;
+  margin: 0 0 2rem 0;
+  opacity: 0.95;
+}
+
+.help-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.btn-volunteer,
+.btn-donate {
+  padding: 1rem 2.5rem;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+
+.btn-volunteer {
+  background: white;
+  color: #FD9A39;
+}
+
+.btn-volunteer:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-donate {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-donate:hover {
+  background: white;
+  color: #FD9A39;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar Styling */
+.shelters-list-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.shelters-list-section::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.shelters-list-section::-webkit-scrollbar-thumb {
+  background: #FD9A39;
+  border-radius: 10px;
+}
+
+.shelters-list-section::-webkit-scrollbar-thumb:hover {
+  background: #FF8C42;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .shelters-main-content {
+    grid-template-columns: 1fr;
+  }
+
+  .map-section {
+    position: relative;
+    top: 0;
+  }
+
+  .interactive-map {
+    height: 400px;
+  }
+
+  .shelters-list-section {
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .shelters-container {
+    padding: 1rem;
+  }
+
+  .shelters-header {
+    padding: 2rem 1.5rem;
+  }
+
+  .shelters-header h1 {
+    font-size: 2rem;
+  }
+
+  .shelters-controls {
+    flex-direction: column;
+  }
+
+  .search-bar-shelters {
+    flex-direction: column;
+  }
+
+  .pets-count-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .shelter-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .help-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Register Shelter Button */
+.btn-register-shelter {
+  margin-top: 1.5rem;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.btn-register-shelter:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+}
+
+/* Modal Styles */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  width: 100%;
+  max-width: 650px;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content h2 {
+  margin: 0 0 1.5rem 0;
+  color: #2d3748;
+  font-size: 1.8rem;
+}
+
+.modal-content .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.modal-content .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group select,
+.modal-content .form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.modal-content .form-group input:focus,
+.modal-content .form-group select:focus,
+.modal-content .form-group textarea:focus {
+  outline: none;
+  border-color: #FD9A39;
+  box-shadow: 0 0 0 3px rgba(253, 154, 57, 0.15);
+}
+
+.modal-content .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.char-count {
+  display: block;
+  text-align: right;
+  font-size: 0.8rem;
+  color: #a0aec0;
+  margin-top: 0.25rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-cancel,
+.btn-submit {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #cbd5e0;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+}
+
+.btn-submit:disabled,
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading and Empty States */
+.loading-container,
+.empty-state-shelters {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #718096;
+}
+
+.empty-state-shelters h3 {
+  font-size: 1.5rem;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.empty-state-shelters p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+/* Shelter Description */
+.shelter-description {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f7fafc;
+  border-radius: 10px;
+}
+
+.shelter-description p {
+  margin: 0;
+  color: #4a5568;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.location-text {
+  color: #4a5568;
+  font-size: 0.9rem;
+}

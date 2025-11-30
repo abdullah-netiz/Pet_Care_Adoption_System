@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Notifications from './Notifications';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -18,26 +19,26 @@ const Navbar = () => {
 
         <div className="navbar-links">
           <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
-            <span className="nav-icon">🏠</span>
             Home
           </Link>
-          <Link to="/browse" className={`nav-link ${isActive('/browse') ? 'active' : ''}`}>
-            <span className="nav-icon">🔍</span>
+          <Link to="/browse-pets" className={`nav-link ${isActive('/browse-pets') ? 'active' : ''}`}>
             Browse Pets
           </Link>
-          <Link to="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`}>
-            <span className="nav-icon">ℹ️</span>
-            About
+          <Link to="/shelters" className={`nav-link ${isActive('/shelters') ? 'active' : ''}`}>
+            Shelters
           </Link>
-          <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`}>
-            <span className="nav-icon">📧</span>
-            Contact
+          <Link to="/stories" className={`nav-link ${isActive('/stories') ? 'active' : ''}`}>
+            Stories
+          </Link>
+          <Link to="/resources" className={`nav-link ${isActive('/resources') ? 'active' : ''}`}>
+            Resources
           </Link>
         </div>
 
         <div className="navbar-actions">
           {user && (
             <>
+              <Notifications />
               <Link to="/profile" className="profile-avatar-link" aria-label="Profile">
                 <div className="nav-avatar">
                   {(user.firstName?.[0] || 'U')}{(user.lastName?.[0] || '')}

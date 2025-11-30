@@ -3,7 +3,43 @@
   background: linear-gradient(135deg, #FFF8F0 0%, #FFF0E0 100%);
 }
 
+.access-denied-container {
+  max-width: 600px;
+  margin: 100px auto;
+  padding: 3rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
 
+.access-denied-container h2 {
+  color: #FF6B6B;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.access-denied-container p {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.access-denied-container button {
+  background: linear-gradient(135deg, #FD9A39 0%, #FF8C42 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.access-denied-container button:hover {
+  transform: translateY(-2px);
+}
 
 .back-to-profile {
   background: rgba(255, 255, 255, 0.2);
@@ -64,6 +100,48 @@
   border-radius: 20px;
   padding: 2.8rem;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.upload-method-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.upload-method-tabs button {
+  flex: 1;
+  padding: 10px 20px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-method-tabs button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.upload-method-tabs button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.image-url-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.image-url-input:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
 .form-section {

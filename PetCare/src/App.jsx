@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
@@ -7,12 +8,18 @@ import Profile from './pages/Profile';
 import AddPet from './pages/AddPet';
 import BrowsePets from './pages/BrowsePets';
 import PetDetail from './pages/PetDetail';
+import Shelters from './pages/Shelters';
+import Stories from './pages/Stories';
+import Resources from './pages/Resources';
 import './App.css';
 
 const AppRoutes = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
+  console.log('AppRoutes render - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
+
   if (isLoading) {
+    console.log('Showing loading screen...');
     return (
       <div className="loading-container">
         <div className="loading-spinner-app">
@@ -33,15 +40,11 @@ const AppRoutes = () => {
       />
       <Route 
         path="/register" 
-        element={
-          isAuthenticated ? <Navigate to="/" replace /> : <Register />
-        } 
+        element={<Register />}
       />
       <Route 
         path="/" 
-        element={
-          isAuthenticated ? <Home /> : <Navigate to="/login" replace />
-        } 
+        element={<Home />}
       />
       <Route
         path="/profile"
@@ -56,10 +59,8 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/browse"
-        element={
-          isAuthenticated ? <BrowsePets /> : <Navigate to="/login" replace />
-        }
+        path="/browse-pets"
+        element={<BrowsePets />}
       />
       <Route
         path="/pet/:id"
@@ -67,20 +68,35 @@ const AppRoutes = () => {
           isAuthenticated ? <PetDetail /> : <Navigate to="/login" replace />
         }
       />
+      <Route
+        path="/shelters"
+        element={<Shelters />}
+      />
+      <Route
+        path="/stories"
+        element={<Stories />}
+      />
+      <Route
+        path="/resources"
+        element={<Resources />}
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
 
 function App() {
+  console.log('App component rendering...');
   return (
-    <AuthProvider>
-      <Router>
-        <div className="app">
-          <AppRoutes />
-        </div>
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <div className="app">
+            <AppRoutes />
+          </div>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
