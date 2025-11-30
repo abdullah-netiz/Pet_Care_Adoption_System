@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import Chatbot from './components/Chatbot';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
@@ -92,6 +93,7 @@ function App() {
         <Router>
           <div className="app">
             <AppRoutes />
+            <Chatbot />
           </div>
         </Router>
       </AuthProvider>
