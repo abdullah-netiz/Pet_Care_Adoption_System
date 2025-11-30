@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import { getAllArticles, subscribeNewsletter } from '../services/firebaseService';
+import { seedArticles } from '../utils/seedArticles';
 import './Resources.css';
 
 const Resources = () => {
@@ -11,6 +12,8 @@ const Resources = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribing, setSubscribing] = useState(false);
   const [newsletterMessage, setNewsletterMessage] = useState('');
+  const [seedError, setSeedError] = useState('');
+  const hasSeededRef = useRef(false);
 
   // Categories data
   const categories = [
@@ -30,12 +33,29 @@ const Resources = () => {
   const loadArticles = async () => {
     try {
       setLoading(true);
-      const fetchedArticles = await getAllArticles(
-        activeCategory === 'all' ? null : activeCategory
-      );
+      setSeedError('');
+      const categoryFilter = activeCategory === 'all' ? null : activeCategory;
+      let fetchedArticles = await getAllArticles(categoryFilter);
+
+      if (
+        fetchedArticles.length === 0 &&
+        !hasSeededRef.current &&
+        (categoryFilter === null || categoryFilter === undefined)
+      ) {
+        const seedResult = await seedArticles();
+        if (seedResult.success) {
+          hasSeededRef.current = true;
+          fetchedArticles = await getAllArticles(categoryFilter);
+        } else {
+          setSeedError('Failed to auto-populate default articles. Please refresh to try again.');
+        }
+      }
+
       setArticles(fetchedArticles);
     } catch (error) {
       console.error('Error loading articles:', error);
+      setArticles([]);
+      setSeedError('Unable to load articles right now. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -109,6 +129,11 @@ const Resources = () => {
           <div className="hero-badge">📖 Knowledge Center</div>
           <h1>Pet Care Resources & Articles</h1>
           <p>Expert guides and tips to help you provide the best care for your furry friends</p>
+          {seedError && (
+            <div className="resources-alert" style={{ color: '#b91c1c', fontWeight: 600 }}>
+              {seedError}
+            </div>
+          )}
           <div className="search-bar-resources">
             <input 
               type="text" 

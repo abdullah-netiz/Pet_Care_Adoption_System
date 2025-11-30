@@ -130,6 +130,12 @@ const PetDetail = () => {
 
   const isOwner = user?.id === pet.ownerId;
   const isAdopter = user?.userType === 'adopter';
+  const quickInfoItems = [
+    { label: 'Age', value: pet.age || 'Not provided', icon: '🎂' },
+    { label: 'Gender', value: pet.gender || 'Not provided', icon: pet.gender === 'Male' ? '♂️' : pet.gender === 'Female' ? '♀️' : '⚧' },
+    { label: 'Size', value: pet.size || 'Not provided', icon: '📏' },
+    pet.breed ? { label: 'Breed', value: pet.breed, icon: '🐾' } : null,
+  ].filter(Boolean);
 
   return (
     <div className="pet-detail-page">
@@ -176,64 +182,45 @@ const PetDetail = () => {
               )}
             </div>
 
-            <div className="pet-detail-quick-info">
-              <div className="quick-info-item">
-                <span className="info-icon">🎂</span>
-                <div>
-                  <span className="info-label">Age</span>
-                  <span className="info-value">{pet.age}</span>
-                </div>
-              </div>
-
-              <div className="quick-info-item">
-                <span className="info-icon">
-                  {pet.gender === 'Male' ? '♂️' : '♀️'}
-                </span>
-                <div>
-                  <span className="info-label">Gender</span>
-                  <span className="info-value">{pet.gender}</span>
-                </div>
-              </div>
-
-              <div className="quick-info-item">
-                <span className="info-icon">📏</span>
-                <div>
-                  <span className="info-label">Size</span>
-                  <span className="info-value">{pet.size}</span>
-                </div>
-              </div>
-
-              {pet.breed && (
-                <div className="quick-info-item">
-                  <span className="info-icon">🐾</span>
-                  <div>
-                    <span className="info-label">Breed</span>
-                    <span className="info-value">{pet.breed}</span>
+            {quickInfoItems.length > 0 && (
+              <div className="pet-detail-quick-info">
+                {quickInfoItems.map((item) => (
+                  <div className="quick-info-item" key={item.label}>
+                    <span className="info-icon">{item.icon}</span>
+                    <div>
+                      <span className="info-label">{item.label}</span>
+                      <span className="info-value">{item.value}</span>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-
-            {pet.city && (
-              <div className="pet-location-section">
-                <span className="location-icon">📍</span>
-                <span className="location-text">{pet.city}</span>
+                ))}
               </div>
             )}
 
-            <div className="pet-detail-section">
+            {pet.city && (
+              <div className="section-card">
+                <div className="pet-location-section">
+                  <span className="location-icon">📍</span>
+                  <div>
+                    <p className="location-label">Currently in</p>
+                    <p className="location-text">{pet.city}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="pet-detail-section section-card">
               <h2>About {pet.name}</h2>
-              <p className="pet-description-full">{pet.description}</p>
+              <p className="pet-description-full">{pet.description || 'No description provided. Reach out to the shelter for more information.'}</p>
             </div>
 
             {pet.medicalHistory && (
-              <div className="pet-detail-section">
+              <div className="pet-detail-section section-card">
                 <h2>Medical History</h2>
                 <p className="pet-medical-info">{pet.medicalHistory}</p>
               </div>
             )}
 
-            <div className="pet-detail-section">
+            <div className="pet-detail-section section-card">
               <h2>Health Status</h2>
               <div className="health-badges">
                 {pet.vaccinated && (
@@ -254,7 +241,7 @@ const PetDetail = () => {
               </div>
             </div>
 
-            <div className="pet-detail-section">
+            <div className="pet-detail-section section-card">
               <h2>Contact Information</h2>
               <div className="contact-info">
                 <div className="contact-item">

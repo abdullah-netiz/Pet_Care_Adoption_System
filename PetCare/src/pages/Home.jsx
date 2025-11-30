@@ -1,11 +1,31 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { getAllPets } from '../services/firebaseService';
 import './Home.css';
 
 const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [featuredPets, setFeaturedPets] = useState([]);
+  const [isFeaturedLoading, setIsFeaturedLoading] = useState(true);
+  const defaultFeaturedImage = 'https://www.homesplus.co.uk/wp-content/uploads/Pet-ownership-Web-HP.jpg';
+
+  useEffect(() => {
+    const fetchFeaturedPets = async () => {
+      try {
+        const pets = await getAllPets({ status: 'available' });
+        setFeaturedPets(pets.slice(0, 3));
+      } catch (error) {
+        console.error('Error loading featured pets:', error);
+      } finally {
+        setIsFeaturedLoading(false);
+      }
+    };
+
+    fetchFeaturedPets();
+  }, []);
 
   return (
     <div className="home-container">
@@ -114,41 +134,44 @@ const Home = () => {
         <section className="featured-pets-section">
           <h2 className="section-title">Featured Pets �</h2>
           <p className="section-subtitle">Meet some of our amazing pets looking for homes</p>
-          <div className="featured-pets-grid">
-            <div className="featured-pet-card">
-              <div className="featured-pet-image"></div>
-              <div className="featured-pet-info">
-                <h3>Max</h3>
-                <p className="pet-type">Golden Retriever • 2 Years</p>
-                <p className="pet-desc">Friendly and energetic, loves to play fetch!</p>
-                <button className="learn-more-btn" onClick={() => navigate('/browse')}>
-                  Learn More
-                </button>
-              </div>
+          {isFeaturedLoading ? (
+            <div className="featured-placeholder">Loading featured pets...</div>
+          ) : featuredPets.length === 0 ? (
+            <div className="featured-placeholder">
+              No featured pets yet. Check back soon!
             </div>
-            <div className="featured-pet-card">
-              <div className="featured-pet-image"></div>
-              <div className="featured-pet-info">
-                <h3>Luna</h3>
-                <p className="pet-type">Siamese Cat • 1 Year</p>
-                <p className="pet-desc">Calm and affectionate, perfect lap companion</p>
-                <button className="learn-more-btn" onClick={() => navigate('/browse')}>
-                  Learn More
-                </button>
-              </div>
+          ) : (
+            <div className="featured-pets-grid">
+              {featuredPets.map((pet) => (
+                <div className="featured-pet-card" key={pet.id}>
+                  <div className="featured-pet-image">
+                    <img
+                      src={pet.imageUrl || defaultFeaturedImage}
+                      alt={pet.name || 'Featured pet'}
+                    />
+                  </div>
+                  <div className="featured-pet-info">
+                    <h3>{pet.name || 'Lovely Friend'}</h3>
+                    <p className="pet-type">
+                      {(pet.type || 'Pet')}
+                      {pet.age ? ` • ${pet.age}` : ''}
+                    </p>
+                    <p className="pet-desc">
+                      {pet.description
+                        ? `${pet.description.substring(0, 110)}${pet.description.length > 110 ? '…' : ''}`
+                        : 'This friendly companion is looking for a loving home.'}
+                    </p>
+                    <button
+                      className="learn-more-btn"
+                      onClick={() => navigate(`/pet/${pet.id}`)}
+                    >
+                      View Profile
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="featured-pet-card">
-              <div className="featured-pet-image"></div>
-              <div className="featured-pet-info">
-                <h3>Charlie</h3>
-                <p className="pet-type">Labrador • 3 Years</p>
-                <p className="pet-desc">Great with kids, well-trained family dog</p>
-                <button className="learn-more-btn" onClick={() => navigate('/browse')}>
-                  Learn More
-                </button>
-              </div>
-            </div>
-          </div>
+          )}
         </section>
 
         {/* Why Adopt Section */}

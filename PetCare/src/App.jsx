@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Chatbot from './components/Chatbot';
 import Login from './components/auth/Login';
@@ -89,14 +89,12 @@ function App() {
   console.log('App component rendering...');
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <Router>
-          <div className="app">
-            <AppRoutes />
-            <Chatbot />
-          </div>
-        </Router>
-      </AuthProvider>
+      <Router>
+        <div className="app">
+          <AppRoutes />
+          <Chatbot />
+        </div>
+      </Router>
     </ErrorBoundary>
   );
 }

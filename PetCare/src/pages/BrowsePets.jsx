@@ -56,6 +56,8 @@ const BrowsePets = () => {
     setFilteredPets(result);
   };
 
+
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
@@ -79,6 +81,8 @@ const BrowsePets = () => {
     };
     return emojiMap[type] || '🐾';
   };
+
+  console.log("filteredPets:", filteredPets);
 
   return (
     <div className="browse-pets-page">

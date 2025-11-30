@@ -9,11 +9,15 @@ import {
   query, 
   where, 
   orderBy,
-  limit,
   serverTimestamp,
   increment
 } from 'firebase/firestore';
 import { db } from '../firebase';
+
+const isIndexError = (error) => {
+  const message = error?.message?.toLowerCase() || '';
+  return error?.code === 'failed-precondition' || message.includes('index');
+};
 
 // Users Collection
 export const createUserProfile = async (userId, userData) => {
@@ -94,28 +98,29 @@ export const getPet = async (petId) => {
 
 export const getAllPets = async (filters = {}) => {
   try {
-    let petsQuery = collection(db, 'pets');
-    
-    // Apply filters
+    const petsRef = collection(db, 'pets');
+    const constraints = [];
+
     if (filters.type) {
-      petsQuery = query(petsQuery, where('type', '==', filters.type));
+      constraints.push(where('type', '==', filters.type));
     }
     if (filters.status) {
-      petsQuery = query(petsQuery, where('status', '==', filters.status));
+      constraints.push(where('status', '==', filters.status));
     }
     if (filters.ownerId) {
-      petsQuery = query(petsQuery, where('ownerId', '==', filters.ownerId));
+      constraints.push(where('ownerId', '==', filters.ownerId));
     }
-    
-    petsQuery = query(petsQuery, orderBy('createdAt', 'desc'));
-    
+
+    const petsQuery = constraints.length ? query(petsRef, ...constraints) : petsRef;
     const querySnapshot = await getDocs(petsQuery);
-    const pets = [];
-    querySnapshot.forEach((doc) => {
-      pets.push({ id: doc.id, ...doc.data() });
+
+    const pets = querySnapshot.docs.map((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
+
+    return pets.sort((a, b) => {
+      const aTime = a.updatedAt?.seconds || a.createdAt?.seconds || 0;
+      const bTime = b.updatedAt?.seconds || b.createdAt?.seconds || 0;
+      return bTime - aTime;
     });
-    
-    return pets;
   } catch (error) {
     console.error('Error getting pets:', error);
     throw error;
@@ -181,31 +186,36 @@ export const getAdoptionRequest = async (requestId) => {
 
 export const getAdoptionRequests = async (userId, userType) => {
   try {
-    let requestsQuery;
-    
-    if (userType === 'adopter') {
-      // Get requests made by this adopter
-      requestsQuery = query(
-        collection(db, 'adoptionRequests'),
-        where('adopterId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-    } else {
-      // Get requests for pets owned by this owner
-      requestsQuery = query(
-        collection(db, 'adoptionRequests'),
-        where('ownerId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
+    const adopterQuery = userType === 'adopter';
+    const constraints = [
+      where(adopterQuery ? 'adopterId' : 'ownerId', '==', userId)
+    ];
+
+    let requestsQuery = query(
+      collection(db, 'adoptionRequests'),
+      ...constraints,
+      orderBy('createdAt', 'desc')
+    );
+
+    let querySnapshot;
+    try {
+      querySnapshot = await getDocs(requestsQuery);
+    } catch (error) {
+      if (!isIndexError(error)) {
+        throw error;
+      }
+      console.warn('Missing Firestore index for adoptionRequests query, falling back to client-side sorting.');
+      requestsQuery = query(collection(db, 'adoptionRequests'), ...constraints);
+      querySnapshot = await getDocs(requestsQuery);
     }
-    
-    const querySnapshot = await getDocs(requestsQuery);
-    const requests = [];
-    querySnapshot.forEach((doc) => {
-      requests.push({ id: doc.id, ...doc.data() });
+
+    const requests = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    return requests.sort((a, b) => {
+      const aTime = a.createdAt?.seconds || 0;
+      const bTime = b.createdAt?.seconds || 0;
+      return bTime - aTime;
     });
-    
-    return requests;
   } catch (error) {
     console.error('Error getting adoption requests:', error);
     throw error;
@@ -338,21 +348,39 @@ export const createArticle = async (articleData) => {
 
 export const getAllArticles = async (category = null) => {
   try {
-    let articlesQuery = collection(db, 'articles');
-    
+    const constraints = [];
+
     if (category && category !== 'all' && category !== 'All') {
-      articlesQuery = query(articlesQuery, where('category', '==', category));
+      constraints.push(where('category', '==', category));
     }
-    
-    articlesQuery = query(articlesQuery, orderBy('createdAt', 'desc'));
-    
-    const querySnapshot = await getDocs(articlesQuery);
-    const articles = [];
-    querySnapshot.forEach((doc) => {
-      articles.push({ id: doc.id, ...doc.data() });
+
+    let articlesQuery = query(
+      collection(db, 'articles'),
+      ...constraints,
+      orderBy('createdAt', 'desc')
+    );
+
+    let querySnapshot;
+    try {
+      querySnapshot = await getDocs(articlesQuery);
+    } catch (error) {
+      if (!isIndexError(error)) {
+        throw error;
+      }
+      console.warn('Missing Firestore index for articles query, falling back to client-side sorting.');
+      articlesQuery = constraints.length
+        ? query(collection(db, 'articles'), ...constraints)
+        : collection(db, 'articles');
+      querySnapshot = await getDocs(articlesQuery);
+    }
+
+    const articles = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    return articles.sort((a, b) => {
+      const aTime = a.createdAt?.seconds || 0;
+      const bTime = b.createdAt?.seconds || 0;
+      return bTime - aTime;
     });
-    
-    return articles;
   } catch (error) {
     console.error('Error getting articles:', error);
     throw error;
